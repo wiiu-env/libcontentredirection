@@ -8,9 +8,12 @@ static OSDynLoad_Module sModuleHandle = nullptr;
 static ContentRedirectionApiErrorType (*sCRAddFSLayer)(CRLayerHandle *, const char *, const char *, FSLayerType) = nullptr;
 static ContentRedirectionApiErrorType (*sCRRemoveFSLayer)(CRLayerHandle)                                         = nullptr;
 static ContentRedirectionApiErrorType (*sCRSetActive)(CRLayerHandle)                                             = nullptr;
-static ContentRedirectionVersion (*sCRGetVersion)()                                                              = nullptr;
+static ContentRedirectionApiErrorType (*sCRGetVersion)(ContentRedirectionVersion *)                              = nullptr;
 static ContentRedirectionApiErrorType (*sCRAddDevice)(const devoptab_t *, int *)                                 = nullptr;
 static ContentRedirectionApiErrorType (*sCRRemoveDevice)(const char *)                                           = nullptr;
+
+
+static ContentRedirectionVersion sContentRedirectionVersion = CONTENT_REDIRECTION_MODULE_VERSION_ERROR;
 
 ContentRedirectionStatus ContentRedirection_InitLibrary() {
     if (OSDynLoad_Acquire("homebrew_content_redirection", &sModuleHandle) != OS_DYNLOAD_OK) {
@@ -22,8 +25,8 @@ ContentRedirectionStatus ContentRedirection_InitLibrary() {
         OSReport("ContentRedirection_Init: CRGetVersion failed.\n");
         return CONTENT_REDIRECTION_RESULT_MODULE_MISSING_EXPORT;
     }
-    auto res = ContentRedirection_GetVersion();
-    if (res != CONTENT_REDIRECT_MODULE_VERSION) {
+    auto res = ContentRedirection_GetVersion(&sContentRedirectionVersion);
+    if (res != CONTENT_REDIRECTION_RESULT_SUCCESS) {
         return CONTENT_REDIRECTION_RESULT_UNSUPPORTED_VERSION;
     }
 
@@ -55,13 +58,17 @@ ContentRedirectionStatus ContentRedirection_InitLibrary() {
     return CONTENT_REDIRECTION_RESULT_SUCCESS;
 }
 
-ContentRedirectionVersion GetVersion();
-ContentRedirectionVersion ContentRedirection_GetVersion() {
+ContentRedirectionApiErrorType GetVersion(ContentRedirectionVersion *);
+ContentRedirectionStatus ContentRedirection_GetVersion(ContentRedirectionVersion *outVariable) {
     if (sCRGetVersion == nullptr) {
         return CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED;
     }
 
-    return reinterpret_cast<decltype(&GetVersion)>(sCRGetVersion)();
+    auto res = reinterpret_cast<decltype(&GetVersion)>(sCRGetVersion)(outVariable);
+    if (res == CONTENT_REDIRECTION_API_ERROR_NONE) {
+        return CONTENT_REDIRECTION_RESULT_SUCCESS;
+    }
+    return res == CONTENT_REDIRECTION_API_ERROR_INVALID_ARG ? CONTENT_REDIRECTION_RESULT_INVALID_ARGUMENT : CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR;
 }
 
 

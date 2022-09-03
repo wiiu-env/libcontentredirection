@@ -52,7 +52,7 @@ typedef enum ContentRedirectionStatus {
 typedef uint32_t CRLayerHandle;
 typedef uint32_t ContentRedirectionVersion;
 
-#define CONTENT_REDIRECT_MODULE_VERSION 0x00000001
+#define CONTENT_REDIRECTION_MODULE_VERSION_ERROR 0xFFFFFFFF
 
 typedef enum ContentRedirectionApiErrorType {
     CONTENT_REDIRECTION_API_ERROR_NONE                  = 0,
@@ -73,10 +73,15 @@ typedef enum ContentRedirectionApiErrorType {
 ContentRedirectionStatus ContentRedirection_InitLibrary();
 
 /**
- * Returns the API Version of the Content Redirection Module.
- * @return The ContentRedirectionVersion of the Module
+ * Retrieves the API Version of the loaded ContentRedirectionModule.<br>
+ * <br>
+ * @param outVersion pointer to the variable where the version will be stored.
+ *
+ * @return CONTENT_REDIRECTION_RESULT_SUCCESS:          The API version has been store in the version ptr.<br>
+ *         CONTENT_REDIRECTION_RESULT_INVALID_ARGUMENT: Invalid version pointer.<br>
+ *         CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR:    Retrieving the module version failed.
  */
-ContentRedirectionVersion ContentRedirection_GetVersion();
+ContentRedirectionStatus ContentRedirection_GetVersion(ContentRedirectionVersion *outVersion);
 
 /**
  * Adds a a FSLayers that redirects the /vol/content or /vol/save fs calles for the Game/Wii U Menu process.
