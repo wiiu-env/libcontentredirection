@@ -83,6 +83,10 @@ ContentRedirectionStatus ContentRedirection_InitLibrary() {
     return CONTENT_REDIRECTION_RESULT_SUCCESS;
 }
 
+ContentRedirectionStatus ContentRedirection_DeInitLibrary() {
+    return CONTENT_REDIRECTION_RESULT_SUCCESS;
+}
+
 ContentRedirectionApiErrorType GetVersion(ContentRedirectionVersion *);
 ContentRedirectionStatus ContentRedirection_GetVersion(ContentRedirectionVersion *outVariable) {
     if (sCRGetVersion == nullptr) {

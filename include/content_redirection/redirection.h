@@ -74,6 +74,8 @@ const char *ContentRedirection_GetStatusStr(ContentRedirectionStatus status);
  */
 ContentRedirectionStatus ContentRedirection_InitLibrary();
 
+ContentRedirectionStatus ContentRedirection_DeInitLibrary();
+
 /**
  * Retrieves the API Version of the loaded ContentRedirectionModule.<br>
  * <br>
