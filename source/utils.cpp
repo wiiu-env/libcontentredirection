@@ -9,9 +9,8 @@ static ContentRedirectionApiErrorType (*sCRAddFSLayer)(CRLayerHandle *, const ch
 static ContentRedirectionApiErrorType (*sCRRemoveFSLayer)(CRLayerHandle)                                         = nullptr;
 static ContentRedirectionApiErrorType (*sCRSetActive)(CRLayerHandle)                                             = nullptr;
 static ContentRedirectionApiErrorType (*sCRGetVersion)(ContentRedirectionVersion *)                              = nullptr;
-static ContentRedirectionApiErrorType (*sCRAddDevice)(const devoptab_t *, int *)                                 = nullptr;
-static ContentRedirectionApiErrorType (*sCRRemoveDevice)(const char *)                                           = nullptr;
-
+static int (*sCRAddDevice)(const devoptab_t *, int *)                                                            = nullptr;
+static int (*sCRRemoveDevice)(const char *)                                                                      = nullptr;
 
 static ContentRedirectionVersion sContentRedirectionVersion = CONTENT_REDIRECTION_MODULE_VERSION_ERROR;
 
