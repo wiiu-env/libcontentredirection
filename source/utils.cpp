@@ -1,4 +1,5 @@
 #include "content_redirection/redirection.h"
+#include "logger.h"
 #include <coreinit/debug.h>
 #include <coreinit/dynload.h>
 #include <sys/iosupport.h>
@@ -36,18 +37,20 @@ const char *ContentRedirection_GetStatusStr(ContentRedirectionStatus status) {
             return "CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED";
         case CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR:
             return "CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR";
+        case CONTENT_REDIRECTION_RESULT_UNSUPPORTED_COMMAND:
+            return "CONTENT_REDIRECTION_RESULT_UNSUPPORTED_COMMAND";
     }
     return "CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR";
 }
 
 ContentRedirectionStatus ContentRedirection_InitLibrary() {
     if (OSDynLoad_Acquire("homebrew_content_redirection", &sModuleHandle) != OS_DYNLOAD_OK) {
-        OSReport("ContentRedirection_Init: OSDynLoad_Acquire failed.\n");
+        DEBUG_FUNCTION_LINE_ERR("OSDynLoad_Acquire failed.");
         return CONTENT_REDIRECTION_RESULT_MODULE_NOT_FOUND;
     }
 
     if (OSDynLoad_FindExport(sModuleHandle, FALSE, "CRGetVersion", (void **) &sCRGetVersion) != OS_DYNLOAD_OK) {
-        OSReport("ContentRedirection_Init: CRGetVersion failed.\n");
+        DEBUG_FUNCTION_LINE_ERR("FindExport CRGetVersion failed.");
         return CONTENT_REDIRECTION_RESULT_MODULE_MISSING_EXPORT;
     }
     auto res = ContentRedirection_GetVersion(&sContentRedirectionVersion);
@@ -56,28 +59,28 @@ ContentRedirectionStatus ContentRedirection_InitLibrary() {
     }
 
     if (OSDynLoad_FindExport(sModuleHandle, FALSE, "CRAddFSLayer", (void **) &sCRAddFSLayer) != OS_DYNLOAD_OK) {
-        OSReport("ContentRedirection_Init: CRAddFSLayer failed.\n");
-        return CONTENT_REDIRECTION_RESULT_MODULE_MISSING_EXPORT;
+        DEBUG_FUNCTION_LINE_ERR("FindExport CRAddFSLayer failed.");
+        sCRAddFSLayer = nullptr;
     }
 
     if (OSDynLoad_FindExport(sModuleHandle, FALSE, "CRRemoveFSLayer", (void **) &sCRRemoveFSLayer) != OS_DYNLOAD_OK) {
-        OSReport("ContentRedirection_Init: CRRemoveFSLayer failed.\n");
-        return CONTENT_REDIRECTION_RESULT_MODULE_MISSING_EXPORT;
+        DEBUG_FUNCTION_LINE_ERR("FindExport CRRemoveFSLayer failed.");
+        sCRRemoveFSLayer = nullptr;
     }
 
     if (OSDynLoad_FindExport(sModuleHandle, FALSE, "CRSetActive", (void **) &sCRSetActive) != OS_DYNLOAD_OK) {
-        OSReport("ContentRedirection_Init: CRSetActive failed.\n");
-        return CONTENT_REDIRECTION_RESULT_MODULE_MISSING_EXPORT;
+        DEBUG_FUNCTION_LINE_ERR("FindExport CRSetActive failed.");
+        sCRSetActive = nullptr;
     }
 
     if (OSDynLoad_FindExport(sModuleHandle, FALSE, "CRAddDevice", (void **) &sCRAddDevice) != OS_DYNLOAD_OK) {
-        OSReport("ContentRedirection_Init: CRAddDevice failed.\n");
-        return CONTENT_REDIRECTION_RESULT_MODULE_MISSING_EXPORT;
+        DEBUG_FUNCTION_LINE_ERR("FindExport CRAddDevice failed.");
+        sCRAddDevice = nullptr;
     }
 
     if (OSDynLoad_FindExport(sModuleHandle, FALSE, "CRRemoveDevice", (void **) &sCRRemoveDevice) != OS_DYNLOAD_OK) {
-        OSReport("ContentRedirection_Init: CRRemoveDevice failed.\n");
-        return CONTENT_REDIRECTION_RESULT_MODULE_MISSING_EXPORT;
+        DEBUG_FUNCTION_LINE_ERR("FindExport CRRemoveDevice failed.");
+        sCRRemoveDevice = nullptr;
     }
 
     return CONTENT_REDIRECTION_RESULT_SUCCESS;
@@ -90,7 +93,15 @@ ContentRedirectionStatus ContentRedirection_DeInitLibrary() {
 ContentRedirectionApiErrorType GetVersion(ContentRedirectionVersion *);
 ContentRedirectionStatus ContentRedirection_GetVersion(ContentRedirectionVersion *outVariable) {
     if (sCRGetVersion == nullptr) {
-        return CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED;
+        if (OSDynLoad_Acquire("homebrew_content_redirection", &sModuleHandle) != OS_DYNLOAD_OK) {
+            DEBUG_FUNCTION_LINE_WARN("OSDynLoad_Acquire failed.");
+            return CONTENT_REDIRECTION_RESULT_MODULE_NOT_FOUND;
+        }
+
+        if (OSDynLoad_FindExport(sModuleHandle, FALSE, "CRGetVersion", (void **) &sCRGetVersion) != OS_DYNLOAD_OK) {
+            DEBUG_FUNCTION_LINE_WARN("FindExport CRGetVersion failed.");
+            return CONTENT_REDIRECTION_RESULT_MODULE_MISSING_EXPORT;
+        }
     }
 
     auto res = reinterpret_cast<decltype(&GetVersion)>(sCRGetVersion)(outVariable);
@@ -103,8 +114,11 @@ ContentRedirectionStatus ContentRedirection_GetVersion(ContentRedirectionVersion
 
 ContentRedirectionApiErrorType AddFSLayer(CRLayerHandle *, const char *, const char *, FSLayerType);
 ContentRedirectionStatus ContentRedirection_AddFSLayer(CRLayerHandle *handlePtr, const char *layerName, const char *replacementDir, FSLayerType layerType) {
-    if (sCRAddFSLayer == nullptr) {
+    if (sContentRedirectionVersion == CONTENT_REDIRECTION_MODULE_VERSION_ERROR) {
         return CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED;
+    }
+    if (sCRAddFSLayer == nullptr || sContentRedirectionVersion < 1) {
+        return CONTENT_REDIRECTION_RESULT_UNSUPPORTED_COMMAND;
     }
     auto res = reinterpret_cast<decltype(&AddFSLayer)>(sCRAddFSLayer)(handlePtr, layerName, replacementDir, layerType);
     if (res == CONTENT_REDIRECTION_API_ERROR_NONE) {
@@ -124,8 +138,11 @@ ContentRedirectionStatus ContentRedirection_AddFSLayer(CRLayerHandle *handlePtr,
 
 ContentRedirectionApiErrorType RemoveFSLayer(CRLayerHandle);
 ContentRedirectionStatus ContentRedirection_RemoveFSLayer(CRLayerHandle handlePtr) {
-    if (sCRAddFSLayer == nullptr) {
+    if (sContentRedirectionVersion == CONTENT_REDIRECTION_MODULE_VERSION_ERROR) {
         return CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED;
+    }
+    if (sCRRemoveFSLayer == nullptr || sContentRedirectionVersion < 1) {
+        return CONTENT_REDIRECTION_RESULT_UNSUPPORTED_COMMAND;
     }
     auto res = reinterpret_cast<decltype(&RemoveFSLayer)>(sCRRemoveFSLayer)(handlePtr);
     if (res == CONTENT_REDIRECTION_API_ERROR_NONE) {
@@ -141,8 +158,11 @@ ContentRedirectionStatus ContentRedirection_RemoveFSLayer(CRLayerHandle handlePt
 
 ContentRedirectionApiErrorType SetActive(CRLayerHandle, bool);
 ContentRedirectionStatus ContentRedirection_SetActive(CRLayerHandle handle, bool active) {
-    if (sCRAddFSLayer == nullptr) {
+    if (sContentRedirectionVersion == CONTENT_REDIRECTION_MODULE_VERSION_ERROR) {
         return CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED;
+    }
+    if (sCRSetActive == nullptr || sContentRedirectionVersion < 1) {
+        return CONTENT_REDIRECTION_RESULT_UNSUPPORTED_COMMAND;
     }
     auto res = reinterpret_cast<decltype(&SetActive)>(sCRSetActive)(handle, active);
     if (res == CONTENT_REDIRECTION_API_ERROR_NONE) {
@@ -157,8 +177,11 @@ ContentRedirectionStatus ContentRedirection_SetActive(CRLayerHandle handle, bool
 }
 
 ContentRedirectionStatus ContentRedirection_AddDevice(const devoptab_t *device, int *resultOut) {
-    if (sCRAddFSLayer == nullptr) {
+    if (sContentRedirectionVersion == CONTENT_REDIRECTION_MODULE_VERSION_ERROR) {
         return CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED;
+    }
+    if (sCRAddDevice == nullptr || sContentRedirectionVersion < 1) {
+        return CONTENT_REDIRECTION_RESULT_UNSUPPORTED_COMMAND;
     }
 
     if (resultOut == nullptr) {
@@ -170,8 +193,11 @@ ContentRedirectionStatus ContentRedirection_AddDevice(const devoptab_t *device, 
 }
 
 ContentRedirectionStatus ContentRedirection_RemoveDevice(const char *name, int *resultOut) {
-    if (sCRAddFSLayer == nullptr) {
+    if (sContentRedirectionVersion == CONTENT_REDIRECTION_MODULE_VERSION_ERROR) {
         return CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED;
+    }
+    if (sCRRemoveDevice == nullptr || sContentRedirectionVersion < 1) {
+        return CONTENT_REDIRECTION_RESULT_UNSUPPORTED_COMMAND;
     }
     if (resultOut == nullptr) {
         return CONTENT_REDIRECTION_RESULT_INVALID_ARGUMENT;
