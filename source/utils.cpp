@@ -14,6 +14,32 @@ static int (*sCRRemoveDevice)(const char *)                                     
 
 static ContentRedirectionVersion sContentRedirectionVersion = CONTENT_REDIRECTION_MODULE_VERSION_ERROR;
 
+const char *ContentRedirection_GetStatusStr(ContentRedirectionStatus status) {
+    switch (status) {
+        case CONTENT_REDIRECTION_RESULT_SUCCESS:
+            return "CONTENT_REDIRECTION_RESULT_SUCCESS";
+        case CONTENT_REDIRECTION_RESULT_MODULE_NOT_FOUND:
+            return "CONTENT_REDIRECTION_RESULT_MODULE_NOT_FOUND";
+        case CONTENT_REDIRECTION_RESULT_MODULE_MISSING_EXPORT:
+            return "CONTENT_REDIRECTION_RESULT_MODULE_MISSING_EXPORT";
+        case CONTENT_REDIRECTION_RESULT_UNSUPPORTED_VERSION:
+            return "CONTENT_REDIRECTION_RESULT_UNSUPPORTED_VERSION";
+        case CONTENT_REDIRECTION_RESULT_INVALID_ARGUMENT:
+            return "CONTENT_REDIRECTION_RESULT_INVALID_ARGUMENT";
+        case CONTENT_REDIRECTION_RESULT_NO_MEMORY:
+            return "CONTENT_REDIRECTION_RESULT_NO_MEMORY";
+        case CONTENT_REDIRECTION_RESULT_UNKNOWN_FS_LAYER_TYPE:
+            return "CONTENT_REDIRECTION_RESULT_UNKNOWN_FS_LAYER_TYPE";
+        case CONTENT_REDIRECTION_RESULT_LAYER_NOT_FOUND:
+            return "CONTENT_REDIRECTION_RESULT_LAYER_NOT_FOUND";
+        case CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED:
+            return "CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED";
+        case CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR:
+            return "CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR";
+    }
+    return "CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR";
+}
+
 ContentRedirectionStatus ContentRedirection_InitLibrary() {
     if (OSDynLoad_Acquire("homebrew_content_redirection", &sModuleHandle) != OS_DYNLOAD_OK) {
         OSReport("ContentRedirection_Init: OSDynLoad_Acquire failed.\n");
