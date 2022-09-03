@@ -5,12 +5,12 @@
 
 static OSDynLoad_Module sModuleHandle = nullptr;
 
-static ContentRedirectionStatus (*sCRAddFSLayer)(CRLayerHandle *, const char *, const char *, FSLayerType) = nullptr;
-static ContentRedirectionStatus (*sCRRemoveFSLayer)(CRLayerHandle)                                         = nullptr;
-static ContentRedirectionStatus (*sCRSetActive)(CRLayerHandle)                                             = nullptr;
-static ContentRedirectionVersion (*sCRGetVersion)()                                                        = nullptr;
-static ContentRedirectionStatus (*sCRAddDevice)(const devoptab_t *, int *)                                 = nullptr;
-static ContentRedirectionStatus (*sCRRemoveDevice)(const char *)                                           = nullptr;
+static ContentRedirectionApiErrorType (*sCRAddFSLayer)(CRLayerHandle *, const char *, const char *, FSLayerType) = nullptr;
+static ContentRedirectionApiErrorType (*sCRRemoveFSLayer)(CRLayerHandle)                                         = nullptr;
+static ContentRedirectionApiErrorType (*sCRSetActive)(CRLayerHandle)                                             = nullptr;
+static ContentRedirectionVersion (*sCRGetVersion)()                                                              = nullptr;
+static ContentRedirectionApiErrorType (*sCRAddDevice)(const devoptab_t *, int *)                                 = nullptr;
+static ContentRedirectionApiErrorType (*sCRRemoveDevice)(const char *)                                           = nullptr;
 
 ContentRedirectionStatus ContentRedirection_InitLibrary() {
     if (OSDynLoad_Acquire("homebrew_content_redirection", &sModuleHandle) != OS_DYNLOAD_OK) {
