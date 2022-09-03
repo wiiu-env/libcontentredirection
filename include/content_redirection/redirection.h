@@ -36,7 +36,7 @@ enum FSLayerType {
     FS_LAYER_TYPE_SAVE_REPLACE,
 };
 
-enum ContentRedirectionStatus {
+typedef enum ContentRedirectionStatus {
     CONTENT_REDIRECTION_RESULT_SUCCESS               = 0,
     CONTENT_REDIRECTION_RESULT_MODULE_NOT_FOUND      = -1,
     CONTENT_REDIRECTION_RESULT_MODULE_MISSING_EXPORT = -2,
@@ -47,7 +47,7 @@ enum ContentRedirectionStatus {
     CONTENT_REDIRECTION_RESULT_LAYER_NOT_FOUND       = -13,
     CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED     = -20,
     CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR         = -1000,
-};
+} ContentRedirectionStatus;
 
 typedef uint32_t CRLayerHandle;
 typedef uint32_t ContentRedirectionVersion;
