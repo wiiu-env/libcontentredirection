@@ -76,7 +76,7 @@ ContentRedirectionStatus ContentRedirection_AddFSLayer(CRLayerHandle *handlePtr,
     }
     switch (res) {
         case CONTENT_REDIRECTION_API_ERROR_INVALID_ARG:
-            return CONTENT_REDIRECTION_RESULT_INVALID_ARG;
+            return CONTENT_REDIRECTION_RESULT_INVALID_ARGUMENT;
         case CONTENT_REDIRECTION_API_ERROR_NO_MEMORY:
             return CONTENT_REDIRECTION_RESULT_NO_MEMORY;
         case CONTENT_REDIRECTION_API_ERROR_UNKNOWN_FS_LAYER_TYPE:
@@ -126,7 +126,7 @@ ContentRedirectionStatus ContentRedirection_AddDevice(const devoptab_t *device, 
     }
 
     if (resultOut == nullptr) {
-        return CONTENT_REDIRECTION_RESULT_INVALID_ARG;
+        return CONTENT_REDIRECTION_RESULT_INVALID_ARGUMENT;
     }
 
     *resultOut = reinterpret_cast<decltype(&AddDevice)>(sCRAddDevice)(device);
@@ -138,7 +138,7 @@ ContentRedirectionStatus ContentRedirection_RemoveDevice(const char *name, int *
         return CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED;
     }
     if (resultOut == nullptr) {
-        return CONTENT_REDIRECTION_RESULT_INVALID_ARG;
+        return CONTENT_REDIRECTION_RESULT_INVALID_ARGUMENT;
     }
     *resultOut = reinterpret_cast<decltype(&RemoveDevice)>(sCRRemoveDevice)(name);
     return CONTENT_REDIRECTION_RESULT_SUCCESS;
