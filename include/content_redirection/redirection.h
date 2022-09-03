@@ -46,6 +46,7 @@ typedef enum ContentRedirectionStatus {
     CONTENT_REDIRECTION_RESULT_UNKNOWN_FS_LAYER_TYPE = -0x12,
     CONTENT_REDIRECTION_RESULT_LAYER_NOT_FOUND       = -0x13,
     CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED     = -0x20,
+    CONTENT_REDIRECTION_RESULT_UNSUPPORTED_COMMAND   = -0x21,
     CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR         = -0x1000,
 } ContentRedirectionStatus;
 
@@ -81,32 +82,33 @@ ContentRedirectionStatus ContentRedirection_DeInitLibrary();
  * <br>
  * @param outVersion pointer to the variable where the version will be stored.
  *
- * @return CONTENT_REDIRECTION_RESULT_SUCCESS:          The API version has been store in the version ptr.<br>
- *         CONTENT_REDIRECTION_RESULT_INVALID_ARGUMENT: Invalid version pointer.<br>
- *         CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR:    Retrieving the module version failed.
+ * @return CONTENT_REDIRECTION_RESULT_SUCCESS:                  The API version has been store in the version ptr.<br>
+ *         CONTENT_REDIRECTION_RESULT_MODULE_NOT_FOUND:         The module could not be found. Make sure the module is loaded.<br>
+ *         CONTENT_REDIRECTION_RESULT_MODULE_MISSING_EXPORT:    The module is missing an expected export.<br>
+ *         CONTENT_REDIRECTION_RESULT_INVALID_ARGUMENT:         Invalid version pointer.<br>
+ *         CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR:            Retrieving the module version failed.
  */
 ContentRedirectionStatus ContentRedirection_GetVersion(ContentRedirectionVersion *outVersion);
 
 /**
- * Adds a a FSLayers that redirects the /vol/content or /vol/save fs calles for the Game/Wii U Menu process.
- * Make sure to remove all added the layers before the application ends.
- * The replacement dir has be to valid in the ContentRedirection Module, use "ContentRedirection_AddDevice" to add a Device for the ContentRedirection Module.
- * Multiple layers can be added. Each layer is valid system wide for the Game/Wii U Menu process.
- * The layers will be processed in reverse adding order. e.g. when you add Layer1, Layer2 and then Layer3; Layer3, Layer2 and finally Layer1 will be processed.
+ * Adds a a FSLayers that redirects the /vol/content or /vol/save fs calles for the Game/Wii U Menu process.  <br>
+ * Make sure to remove all added the layers before the application ends.  <br>
+ * The replacement dir has be to valid in the ContentRedirection Module, use "ContentRedirection_AddDevice" to add a Device for the ContentRedirection Module.  <br>
+ * Multiple layers can be added. Each layer is valid system wide for the Game/Wii U Menu process.  <br>
+ * The layers will be processed in reverse adding order. e.g. when you add Layer1, Layer2 and then Layer3; Layer3, Layer2 and finally Layer1 will be processed.  <br>
  * An added layer is active by default.
  *
  * @param handlePtr         The handle of the layer is written to this pointer.
  * @param layerName         Name of the layer, used for debugging.
  * @param replacementDir    Path to the directory that will replace / merge into the original one.
- * @param layerType         Type of the layer, see FSLayerType for more information.
- *
+ * @param layerType         Type of the layer, see FSLayerType for more information.  <br>
  *                          If set to to false, errors of this layer will be returned to the OS.
-* @return CONTENT_REDIRECTION_RESULT_SUCCESS:               The layer had been added successfully.
- *                                                          The layer has to be removed before the currently running application ends.
-*         CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED:     "ContentRedirection_Init()" was not called.
-*         CONTENT_REDIRECTION_API_ERROR_INVALID_ARG:        "handlePtr", "layerName" or "replacementDir" is NULL
-*         CONTENT_REDIRECTION_API_ERROR_NO_MEMORY:          Not enough memory to create this layer.
-*         CONTENT_REDIRECTION_API_ERROR_UNKNOWN_LAYER_TYPE: Unknown/invalid LayerType. See FSLayerType for all supported layers.
+* @return CONTENT_REDIRECTION_RESULT_SUCCESS:               The layer had been added successfully. <br>
+ *                                                          The layer has to be removed before the currently running application ends. <br>
+*         CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED:     "ContentRedirection_InitLibrary()" was not called. <br>
+*         CONTENT_REDIRECTION_RESULT_INVALID_ARGUMENT:      "handlePtr", "layerName" or "replacementDir" is NULL <br>
+*         CONTENT_REDIRECTION_API_ERROR_NO_MEMORY:          Not enough memory to create this layer. <br>
+*         CONTENT_REDIRECTION_API_ERROR_UNKNOWN_LAYER_TYPE: Unknown/invalid LayerType. See FSLayerType for all supported layers. <br>
 *         CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR:         Unknown error.
  */
 ContentRedirectionStatus ContentRedirection_AddFSLayer(CRLayerHandle *handlePtr, const char *layerName, const char *replacementDir, FSLayerType layerType);
@@ -119,28 +121,30 @@ ContentRedirectionStatus ContentRedirection_AddFSLayer(CRLayerHandle *handlePtr,
 ContentRedirectionStatus ContentRedirection_RemoveFSLayer(CRLayerHandle handle);
 
 /**
- * Set the "active" flag for a given FSLayer.
+ * Set the "active" flag for a given FSLayer. <br>
  *
  * @param handle Handle of the FSLayer.
  * @param active New "active"-state of the layer
- * @return CONTENT_REDIRECTION_RESULT_SUCCESS:           The active state has been set successfully.
- *         CONTENT_REDIRECTION_RESULT_LAYER_NOT_FOUND:   Invalid FSLayer handle.
- *         CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED: "ContentRedirection_Init()" was not called.
- *         CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR:      Unknown error.
+ * @return CONTENT_REDIRECTION_RESULT_SUCCESS:              The active state has been set successfully. <br>
+ *         CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED:    "ContentRedirection_InitLibrary()" was not called. <br>
+ *         CONTENT_REDIRECTION_RESULT_UNSUPPORTED_COMMAND:  This command is not supported by the currently loaded Module. <br>
+ *         CONTENT_REDIRECTION_RESULT_LAYER_NOT_FOUND:      Invalid FSLayer handle. <br>
+ *         CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR:        Unknown error.
  */
 ContentRedirectionStatus ContentRedirection_SetActive(CRLayerHandle handle, bool active);
 
 /**
- * Calls "AddDevice" for the ContentRedirection Module.
- * When a device is added for the ContentRedirection Module, it can be used in FSLayers.
+ * Calls "AddDevice" for the ContentRedirection Module. <br>
+ * When a device is added for the ContentRedirection Module, it can be used in FSLayers. <br>
  *
  * @param device        Device that will be added
  * @param resultOut     Will hold the result of the "AddDevice" call.
- * @return CONTENT_REDIRECTION_RESULT_SUCCESS:           AddDevice has been called, result is written to resultOut.
- *                                                       See documentation of AddDevice for more information
- *         CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED: "ContentRedirection_Init()" was not called.
- *         CONTENT_REDIRECTION_RESULT_INVALID_ARG:       resultOut is NULL.
- *         CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR:      Unknown error.
+ * @return CONTENT_REDIRECTION_RESULT_SUCCESS:              AddDevice has been called, result is written to resultOut. <br>
+ *                                                          See documentation of AddDevice for more information <br>
+ *         CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED:    "ContentRedirection_InitLibrary()" was not called. <br>
+ *         CONTENT_REDIRECTION_RESULT_UNSUPPORTED_COMMAND:  This command is not supported by the currently loaded Module. <br>
+ *         CONTENT_REDIRECTION_RESULT_INVALID_ARG:          resultOut is NULL. <br>
+ *         CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR:        Unknown error. <br>
  */
 ContentRedirectionStatus ContentRedirection_AddDevice(const devoptab_t *device, int *resultOut);
 
@@ -149,10 +153,11 @@ ContentRedirectionStatus ContentRedirection_AddDevice(const devoptab_t *device, 
  *
  * @param name      name of the device that will be added. e.g. "romfs:"
  * @param resultOut Will hold the result of the "AddDevice" call.
- * @return  CONTENT_REDIRECTION_RESULT_SUCCESS:           RemoveDevice has been called, result is written to resultOut.
- *                                                        See documentation of RemoveDevice for more information
- *          CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED: "ContentRedirection_Init()" was not called.
- *          CONTENT_REDIRECTION_RESULT_INVALID_ARG:       resultOut is NULL.
+ * @return  CONTENT_REDIRECTION_RESULT_SUCCESS:           RemoveDevice has been called, result is written to resultOut. <br>
+ *                                                        See documentation of RemoveDevice for more information <br>
+ *          CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED: "ContentRedirection_InitLibrary()" was not called. <br>
+ *         CONTENT_REDIRECTION_RESULT_UNSUPPORTED_COMMAND:  This command is not supported by the currently loaded Module. <br>
+ *          CONTENT_REDIRECTION_RESULT_INVALID_ARG:       resultOut is NULL. <br>
  *          CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR:     Unknown error.
  */
 ContentRedirectionStatus ContentRedirection_RemoveDevice(const char *name, int *resultOut);
