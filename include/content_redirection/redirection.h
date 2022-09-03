@@ -62,6 +62,8 @@ typedef enum ContentRedirectionApiErrorType {
     CONTENT_REDIRECTION_API_ERROR_LAYER_NOT_FOUND       = -4,
 } ContentRedirectionApiErrorType;
 
+const char *ContentRedirection_GetStatusStr(ContentRedirectionStatus status);
+
 /**
  * This function has to be called before any other function of this lib (except ContentRedirection_GetVersion) can be used.
  *
