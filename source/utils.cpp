@@ -12,7 +12,7 @@ static ContentRedirectionVersion (*sCRGetVersion)()                             
 static ContentRedirectionStatus (*sCRAddDevice)(const devoptab_t *, int *)                                 = nullptr;
 static ContentRedirectionStatus (*sCRRemoveDevice)(const char *)                                           = nullptr;
 
-ContentRedirectionStatus ContentRedirection_Init() {
+ContentRedirectionStatus ContentRedirection_InitLibrary() {
     if (OSDynLoad_Acquire("homebrew_content_redirection", &sModuleHandle) != OS_DYNLOAD_OK) {
         OSReport("ContentRedirection_Init: OSDynLoad_Acquire failed.\n");
         return CONTENT_REDIRECTION_RESULT_MODULE_NOT_FOUND;

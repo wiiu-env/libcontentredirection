@@ -70,7 +70,7 @@ typedef enum ContentRedirectionApiErrorType {
  *          CONTENT_REDIRECTION_RESULT_MODULE_MISSING_EXPORT:   The module is missing an expected export.
  *          CONTENT_REDIRECTION_RESULT_UNSUPPORTED_VERSION:     The version of the loaded module is not compatible with this version of the lib.
  */
-ContentRedirectionStatus ContentRedirection_Init();
+ContentRedirectionStatus ContentRedirection_InitLibrary();
 
 /**
  * Returns the API Version of the Content Redirection Module.
