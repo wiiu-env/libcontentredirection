@@ -7,9 +7,7 @@
 extern "C" {
 #endif
 
-#include <cstdint>
-
-enum FSLayerType {
+typedef enum FSLayerType {
     /* Redirects the /vol/content to a given path.
      * Existing files in /vol/content will be ignored, only files of the layer (provided via the replacementDir) will be used.
      */
@@ -34,7 +32,7 @@ enum FSLayerType {
      * Existing files in /vol/save will be ignored, only files in the layer (provided via the replacementDir) will be used.
      */
     FS_LAYER_TYPE_SAVE_REPLACE,
-};
+} FSLayerType;
 
 typedef enum ContentRedirectionStatus {
     CONTENT_REDIRECTION_RESULT_SUCCESS               = 0,
