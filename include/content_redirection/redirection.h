@@ -32,6 +32,16 @@ typedef enum FSLayerType {
      * Existing files in /vol/save will be ignored, only files in the layer (provided via the replacementDir) will be used.
      */
     FS_LAYER_TYPE_SAVE_REPLACE,
+
+    /*
+     * Same as FS_LAYER_TYPE_CONTENT_REPLACE, but for /vol/aoc
+     */
+    FS_LAYER_TYPE_AOC_REPLACE,
+
+    /*
+     * Same as FS_LAYER_TYPE_CONTENT_MERGE, but for /vol/aoc
+     */
+    FS_LAYER_TYPE_AOC_MERGE,
 } FSLayerType;
 
 typedef enum ContentRedirectionStatus {
