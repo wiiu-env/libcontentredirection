@@ -49,7 +49,7 @@ ContentRedirectionStatus ContentRedirection_InitLibrary() {
         return CONTENT_REDIRECTION_RESULT_MODULE_NOT_FOUND;
     }
 
-    if (OSDynLoad_FindExport(sModuleHandle, FALSE, "CRGetVersion", (void **) &sCRGetVersion) != OS_DYNLOAD_OK) {
+    if (OSDynLoad_FindExport(sModuleHandle, OS_DYNLOAD_EXPORT_FUNC, "CRGetVersion", (void **) &sCRGetVersion) != OS_DYNLOAD_OK) {
         DEBUG_FUNCTION_LINE_ERR("FindExport CRGetVersion failed.");
         return CONTENT_REDIRECTION_RESULT_MODULE_MISSING_EXPORT;
     }
@@ -58,27 +58,27 @@ ContentRedirectionStatus ContentRedirection_InitLibrary() {
         return CONTENT_REDIRECTION_RESULT_UNSUPPORTED_VERSION;
     }
 
-    if (OSDynLoad_FindExport(sModuleHandle, FALSE, "CRAddFSLayer", (void **) &sCRAddFSLayer) != OS_DYNLOAD_OK) {
+    if (OSDynLoad_FindExport(sModuleHandle, OS_DYNLOAD_EXPORT_FUNC, "CRAddFSLayer", (void **) &sCRAddFSLayer) != OS_DYNLOAD_OK) {
         DEBUG_FUNCTION_LINE_ERR("FindExport CRAddFSLayer failed.");
         sCRAddFSLayer = nullptr;
     }
 
-    if (OSDynLoad_FindExport(sModuleHandle, FALSE, "CRRemoveFSLayer", (void **) &sCRRemoveFSLayer) != OS_DYNLOAD_OK) {
+    if (OSDynLoad_FindExport(sModuleHandle, OS_DYNLOAD_EXPORT_FUNC, "CRRemoveFSLayer", (void **) &sCRRemoveFSLayer) != OS_DYNLOAD_OK) {
         DEBUG_FUNCTION_LINE_ERR("FindExport CRRemoveFSLayer failed.");
         sCRRemoveFSLayer = nullptr;
     }
 
-    if (OSDynLoad_FindExport(sModuleHandle, FALSE, "CRSetActive", (void **) &sCRSetActive) != OS_DYNLOAD_OK) {
+    if (OSDynLoad_FindExport(sModuleHandle, OS_DYNLOAD_EXPORT_FUNC, "CRSetActive", (void **) &sCRSetActive) != OS_DYNLOAD_OK) {
         DEBUG_FUNCTION_LINE_ERR("FindExport CRSetActive failed.");
         sCRSetActive = nullptr;
     }
 
-    if (OSDynLoad_FindExport(sModuleHandle, FALSE, "CRAddDevice", (void **) &sCRAddDevice) != OS_DYNLOAD_OK) {
+    if (OSDynLoad_FindExport(sModuleHandle, OS_DYNLOAD_EXPORT_FUNC, "CRAddDevice", (void **) &sCRAddDevice) != OS_DYNLOAD_OK) {
         DEBUG_FUNCTION_LINE_ERR("FindExport CRAddDevice failed.");
         sCRAddDevice = nullptr;
     }
 
-    if (OSDynLoad_FindExport(sModuleHandle, FALSE, "CRRemoveDevice", (void **) &sCRRemoveDevice) != OS_DYNLOAD_OK) {
+    if (OSDynLoad_FindExport(sModuleHandle, OS_DYNLOAD_EXPORT_FUNC, "CRRemoveDevice", (void **) &sCRRemoveDevice) != OS_DYNLOAD_OK) {
         DEBUG_FUNCTION_LINE_ERR("FindExport CRRemoveDevice failed.");
         sCRRemoveDevice = nullptr;
     }
@@ -98,7 +98,7 @@ ContentRedirectionStatus ContentRedirection_GetVersion(ContentRedirectionVersion
             return CONTENT_REDIRECTION_RESULT_MODULE_NOT_FOUND;
         }
 
-        if (OSDynLoad_FindExport(sModuleHandle, FALSE, "CRGetVersion", (void **) &sCRGetVersion) != OS_DYNLOAD_OK) {
+        if (OSDynLoad_FindExport(sModuleHandle, OS_DYNLOAD_EXPORT_FUNC, "CRGetVersion", (void **) &sCRGetVersion) != OS_DYNLOAD_OK) {
             DEBUG_FUNCTION_LINE_WARN("FindExport CRGetVersion failed.");
             return CONTENT_REDIRECTION_RESULT_MODULE_MISSING_EXPORT;
         }
