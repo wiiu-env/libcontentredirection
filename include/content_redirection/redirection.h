@@ -42,6 +42,11 @@ typedef enum FSLayerType {
      * Same as FS_LAYER_TYPE_CONTENT_MERGE, but for /vol/aoc
      */
     FS_LAYER_TYPE_AOC_MERGE,
+
+    /* Redirects the /vol/save to a given path but leaves the /vol/save/common directory as it is.
+     * Existing files in /vol/save/8XXXXXXX will be ignored, only files in the layer (provided via the replacementDir) will be used.
+     */
+    FS_LAYER_TYPE_SAVE_REPLACE_IGNORE_VOL_SAVE_COMMON,
 } FSLayerType;
 
 typedef enum ContentRedirectionStatus {
