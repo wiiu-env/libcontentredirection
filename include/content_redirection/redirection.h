@@ -49,6 +49,12 @@ typedef enum FSLayerType {
     FS_LAYER_TYPE_SAVE_REPLACE_FOR_CURRENT_USER,
 } FSLayerType;
 
+typedef enum FSLayerTypeEx {
+    FS_LAYER_TYPE_EX_REPLACE_DIRECTORY,
+    FS_LAYER_TYPE_EX_MERGE_DIRECTORY,
+    FS_LAYER_TYPE_EX_REPLACE_FILE,
+} FSLayerTypeEx;
+
 typedef enum ContentRedirectionStatus {
     CONTENT_REDIRECTION_RESULT_SUCCESS               = 0,
     CONTENT_REDIRECTION_RESULT_MODULE_NOT_FOUND      = -0x1,
@@ -104,9 +110,9 @@ ContentRedirectionStatus ContentRedirection_DeInitLibrary();
 ContentRedirectionStatus ContentRedirection_GetVersion(ContentRedirectionVersion *outVersion);
 
 /**
- * Adds a a FSLayers that redirects the /vol/content or /vol/save fs calles for the Game/Wii U Menu process.  <br>
+ * Adds a FSLayers that redirects the /vol/content or /vol/save fs calls for the Game/Wii U Menu process.  <br>
  * Make sure to remove all added the layers before the application ends.  <br>
- * The replacement dir has be to valid in the ContentRedirection Module, use "ContentRedirection_AddDevice" to add a Device for the ContentRedirection Module.  <br>
+ * The replacement dir has to be valid in the ContentRedirection Module, use "ContentRedirection_AddDevice" to add a Device for the ContentRedirection Module.  <br>
  * Multiple layers can be added. Each layer is valid system wide for the Game/Wii U Menu process.  <br>
  * The layers will be processed in reverse adding order. e.g. when you add Layer1, Layer2 and then Layer3; Layer3, Layer2 and finally Layer1 will be processed.  <br>
  * An added layer is active by default.
@@ -115,7 +121,7 @@ ContentRedirectionStatus ContentRedirection_GetVersion(ContentRedirectionVersion
  * @param layerName         Name of the layer, used for debugging.
  * @param replacementDir    Path to the directory that will replace / merge into the original one.
  * @param layerType         Type of the layer, see FSLayerType for more information.  <br>
- *                          If set to to false, errors of this layer will be returned to the OS.
+ *                          If set to false, errors of this layer will be returned to the OS.
 * @return CONTENT_REDIRECTION_RESULT_SUCCESS:               The layer had been added successfully. <br>
  *                                                          The layer has to be removed before the currently running application ends. <br>
 *         CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED:     "ContentRedirection_InitLibrary()" was not called. <br>
@@ -124,7 +130,34 @@ ContentRedirectionStatus ContentRedirection_GetVersion(ContentRedirectionVersion
 *         CONTENT_REDIRECTION_API_ERROR_UNKNOWN_LAYER_TYPE: Unknown/invalid LayerType. See FSLayerType for all supported layers. <br>
 *         CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR:         Unknown error.
  */
-ContentRedirectionStatus ContentRedirection_AddFSLayer(CRLayerHandle *handlePtr, const char *layerName, const char *replacementDir, FSLayerType layerType);
+ContentRedirectionStatus ContentRedirection_AddFSLayer(CRLayerHandle *handlePtr, const char *layerName, const char *replacementDir, FSLayerTypeEx layerType);
+
+/**
+ * Adds a FSLayer that redirects a files or directories fs calls for the Game/Wii U Menu process.  <br>
+ * Make sure to remove all added the layers before the application ends.  <br>
+ * The replacement dir has to be valid in the ContentRedirection Module, use "ContentRedirection_AddDevice" to add a Device for the ContentRedirection Module.  <br>
+ * Multiple layers can be added. Each layer is valid system mwide for the Game/Wii U Menu process.  <br>
+ * The layers will be processed in reverse adding order. e.g. when you add Layer1, Layer2 and then Layer3; Layer3, Layer2 and finally Layer1 will be processed.  <br>
+ * An added layer is active by default.
+ *
+ * **Requires API version 2 or higher**
+ *
+ * @param handlePtr         The handle of the layer is written to this pointer.
+ * @param layerName         Name of the layer, used for debugging.
+ * @param targetPath        Path to the directory/file that should be replaced or merged.
+ * @param replacementPath   Path to the directory/file that will replace / merge into the original one.
+ * @param layerType         Type of the layer, see FSLayerType for more information.  <br>
+ *                          If set to false, errors of this layer will be returned to the OS.
+* @return CONTENT_REDIRECTION_RESULT_SUCCESS:               The layer had been added successfully. <br>
+ *                                                          The layer has to be removed before the currently running application ends. <br>
+*         CONTENT_REDIRECTION_RESULT_UNSUPPORTED_COMMAND:   This function requires API version 2 <br>
+*         CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED:     "ContentRedirection_InitLibrary()" was not called. <br>
+*         CONTENT_REDIRECTION_RESULT_INVALID_ARGUMENT:      "handlePtr", "layerName" or "replacementDir" is NULL <br>
+*         CONTENT_REDIRECTION_API_ERROR_NO_MEMORY:          Not enough memory to create this layer. <br>
+*         CONTENT_REDIRECTION_API_ERROR_UNKNOWN_LAYER_TYPE: Unknown/invalid LayerType. See FSLayerType for all supported layers. <br>
+*         CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR:         Unknown error.
+ */
+ContentRedirectionStatus ContentRedirection_AddFSLayerEx(CRLayerHandle *handlePtr, const char *layerName, const char *targetPath, const char *replacementPath, FSLayerTypeEx layerType);
 
 /**
  * Removes a previously added FS Layer.
