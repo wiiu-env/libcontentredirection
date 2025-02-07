@@ -6,12 +6,13 @@
 
 static OSDynLoad_Module sModuleHandle = nullptr;
 
-static ContentRedirectionApiErrorType (*sCRAddFSLayer)(CRLayerHandle *, const char *, const char *, FSLayerType) = nullptr;
-static ContentRedirectionApiErrorType (*sCRRemoveFSLayer)(CRLayerHandle)                                         = nullptr;
-static ContentRedirectionApiErrorType (*sCRSetActive)(CRLayerHandle)                                             = nullptr;
-static ContentRedirectionApiErrorType (*sCRGetVersion)(ContentRedirectionVersion *)                              = nullptr;
-static int (*sCRAddDevice)(const devoptab_t *, int *)                                                            = nullptr;
-static int (*sCRRemoveDevice)(const char *)                                                                      = nullptr;
+static ContentRedirectionApiErrorType (*sCRAddFSLayerEx)(CRLayerHandle *, const char *, const char *, const char *, FSLayerTypeEx) = nullptr;
+static ContentRedirectionApiErrorType (*sCRAddFSLayer)(CRLayerHandle *, const char *, const char *, FSLayerType)                   = nullptr;
+static ContentRedirectionApiErrorType (*sCRRemoveFSLayer)(CRLayerHandle)                                                           = nullptr;
+static ContentRedirectionApiErrorType (*sCRSetActive)(CRLayerHandle, bool)                                                         = nullptr;
+static ContentRedirectionApiErrorType (*sCRGetVersion)(ContentRedirectionVersion *)                                                = nullptr;
+static int (*sCRAddDevice)(const devoptab_t *, int *)                                                                              = nullptr;
+static int (*sCRRemoveDevice)(const char *)                                                                                        = nullptr;
 
 static ContentRedirectionVersion sContentRedirectionVersion = CONTENT_REDIRECTION_MODULE_VERSION_ERROR;
 
@@ -62,6 +63,10 @@ ContentRedirectionStatus ContentRedirection_InitLibrary() {
         DEBUG_FUNCTION_LINE_ERR("FindExport CRAddFSLayer failed.");
         sCRAddFSLayer = nullptr;
     }
+    if (OSDynLoad_FindExport(sModuleHandle, OS_DYNLOAD_EXPORT_FUNC, "CRAddFSLayerEx", (void **) &sCRAddFSLayerEx) != OS_DYNLOAD_OK) {
+        DEBUG_FUNCTION_LINE_ERR("FindExport CRAddFSLayerEx failed.");
+        sCRAddFSLayerEx = nullptr;
+    }
 
     if (OSDynLoad_FindExport(sModuleHandle, OS_DYNLOAD_EXPORT_FUNC, "CRRemoveFSLayer", (void **) &sCRRemoveFSLayer) != OS_DYNLOAD_OK) {
         DEBUG_FUNCTION_LINE_ERR("FindExport CRRemoveFSLayer failed.");
@@ -90,8 +95,7 @@ ContentRedirectionStatus ContentRedirection_DeInitLibrary() {
     return CONTENT_REDIRECTION_RESULT_SUCCESS;
 }
 
-ContentRedirectionApiErrorType GetVersion(ContentRedirectionVersion *);
-ContentRedirectionStatus ContentRedirection_GetVersion(ContentRedirectionVersion *outVariable) {
+ContentRedirectionStatus ContentRedirection_GetVersion(ContentRedirectionVersion *outVersion) {
     if (sCRGetVersion == nullptr) {
         if (OSDynLoad_Acquire("homebrew_content_redirection", &sModuleHandle) != OS_DYNLOAD_OK) {
             DEBUG_FUNCTION_LINE_WARN("OSDynLoad_Acquire failed.");
@@ -104,7 +108,7 @@ ContentRedirectionStatus ContentRedirection_GetVersion(ContentRedirectionVersion
         }
     }
 
-    auto res = reinterpret_cast<decltype(&GetVersion)>(sCRGetVersion)(outVariable);
+    const auto res = sCRGetVersion(outVersion);
     if (res == CONTENT_REDIRECTION_API_ERROR_NONE) {
         return CONTENT_REDIRECTION_RESULT_SUCCESS;
     }
@@ -112,15 +116,14 @@ ContentRedirectionStatus ContentRedirection_GetVersion(ContentRedirectionVersion
 }
 
 
-ContentRedirectionApiErrorType AddFSLayer(CRLayerHandle *, const char *, const char *, FSLayerType);
-ContentRedirectionStatus ContentRedirection_AddFSLayer(CRLayerHandle *handlePtr, const char *layerName, const char *replacementDir, FSLayerType layerType) {
+ContentRedirectionStatus ContentRedirection_AddFSLayer(CRLayerHandle *handlePtr, const char *layerName, const char *replacementDir, const FSLayerType layerType) {
     if (sContentRedirectionVersion == CONTENT_REDIRECTION_MODULE_VERSION_ERROR) {
         return CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED;
     }
     if (sCRAddFSLayer == nullptr || sContentRedirectionVersion < 1) {
         return CONTENT_REDIRECTION_RESULT_UNSUPPORTED_COMMAND;
     }
-    auto res = reinterpret_cast<decltype(&AddFSLayer)>(sCRAddFSLayer)(handlePtr, layerName, replacementDir, layerType);
+    auto res = sCRAddFSLayer(handlePtr, layerName, replacementDir, layerType);
     if (res == CONTENT_REDIRECTION_API_ERROR_NONE) {
         return CONTENT_REDIRECTION_RESULT_SUCCESS;
     }
@@ -136,7 +139,29 @@ ContentRedirectionStatus ContentRedirection_AddFSLayer(CRLayerHandle *handlePtr,
     }
 }
 
-ContentRedirectionApiErrorType RemoveFSLayer(CRLayerHandle);
+ContentRedirectionStatus ContentRedirection_AddFSLayerEx(CRLayerHandle *handlePtr, const char *layerName, const char *targetPath, const char *replacementDir, const FSLayerTypeEx layerType) {
+    if (sContentRedirectionVersion == CONTENT_REDIRECTION_MODULE_VERSION_ERROR) {
+        return CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED;
+    }
+    if (sCRAddFSLayerEx == nullptr || sContentRedirectionVersion < 2) {
+        return CONTENT_REDIRECTION_RESULT_UNSUPPORTED_COMMAND;
+    }
+    const auto res = sCRAddFSLayerEx(handlePtr, layerName, targetPath, replacementDir, layerType);
+    if (res == CONTENT_REDIRECTION_API_ERROR_NONE) {
+        return CONTENT_REDIRECTION_RESULT_SUCCESS;
+    }
+    switch (res) {
+        case CONTENT_REDIRECTION_API_ERROR_INVALID_ARG:
+            return CONTENT_REDIRECTION_RESULT_INVALID_ARGUMENT;
+        case CONTENT_REDIRECTION_API_ERROR_NO_MEMORY:
+            return CONTENT_REDIRECTION_RESULT_NO_MEMORY;
+        case CONTENT_REDIRECTION_API_ERROR_UNKNOWN_FS_LAYER_TYPE:
+            return CONTENT_REDIRECTION_RESULT_UNKNOWN_FS_LAYER_TYPE;
+        default:
+            return CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR;
+    }
+}
+
 ContentRedirectionStatus ContentRedirection_RemoveFSLayer(CRLayerHandle handlePtr) {
     if (sContentRedirectionVersion == CONTENT_REDIRECTION_MODULE_VERSION_ERROR) {
         return CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED;
@@ -144,7 +169,7 @@ ContentRedirectionStatus ContentRedirection_RemoveFSLayer(CRLayerHandle handlePt
     if (sCRRemoveFSLayer == nullptr || sContentRedirectionVersion < 1) {
         return CONTENT_REDIRECTION_RESULT_UNSUPPORTED_COMMAND;
     }
-    auto res = reinterpret_cast<decltype(&RemoveFSLayer)>(sCRRemoveFSLayer)(handlePtr);
+    const auto res = sCRRemoveFSLayer(handlePtr);
     if (res == CONTENT_REDIRECTION_API_ERROR_NONE) {
         return CONTENT_REDIRECTION_RESULT_SUCCESS;
     }
@@ -156,7 +181,6 @@ ContentRedirectionStatus ContentRedirection_RemoveFSLayer(CRLayerHandle handlePt
     return CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR;
 }
 
-ContentRedirectionApiErrorType SetActive(CRLayerHandle, bool);
 ContentRedirectionStatus ContentRedirection_SetActive(CRLayerHandle handle, bool active) {
     if (sContentRedirectionVersion == CONTENT_REDIRECTION_MODULE_VERSION_ERROR) {
         return CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED;
@@ -164,7 +188,7 @@ ContentRedirectionStatus ContentRedirection_SetActive(CRLayerHandle handle, bool
     if (sCRSetActive == nullptr || sContentRedirectionVersion < 1) {
         return CONTENT_REDIRECTION_RESULT_UNSUPPORTED_COMMAND;
     }
-    auto res = reinterpret_cast<decltype(&SetActive)>(sCRSetActive)(handle, active);
+    const auto res = sCRSetActive(handle, active);
     if (res == CONTENT_REDIRECTION_API_ERROR_NONE) {
         return CONTENT_REDIRECTION_RESULT_SUCCESS;
     }
