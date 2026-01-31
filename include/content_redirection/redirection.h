@@ -130,7 +130,7 @@ ContentRedirectionStatus ContentRedirection_GetVersion(ContentRedirectionVersion
 *         CONTENT_REDIRECTION_API_ERROR_UNKNOWN_LAYER_TYPE: Unknown/invalid LayerType. See FSLayerType for all supported layers. <br>
 *         CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR:         Unknown error.
  */
-ContentRedirectionStatus ContentRedirection_AddFSLayer(CRLayerHandle *handlePtr, const char *layerName, const char *replacementDir, FSLayerTypeEx layerType);
+ContentRedirectionStatus ContentRedirection_AddFSLayer(CRLayerHandle *handlePtr, const char *layerName, const char *replacementDir, FSLayerType layerType);
 
 /**
  * Adds a FSLayer that redirects a files or directories fs calls for the Game/Wii U Menu process.  <br>
