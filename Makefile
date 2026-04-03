@@ -117,7 +117,10 @@ lib:
 	@[ -d $@ ] || mkdir -p $@
 
 release:
-	@[ -d $@ ] || mkdir -p $@
+	@$(shell [ ! -d 'release' ] && mkdir -p 'release')
+
+debug:
+	@$(shell [ ! -d 'debug' ] && mkdir -p 'debug')
 
 lib/libcontentredirection.a :$(SOURCES) $(INCLUDES) | lib release
 	@$(MAKE) BUILD=release OUTPUT=$(CURDIR)/$@ \
