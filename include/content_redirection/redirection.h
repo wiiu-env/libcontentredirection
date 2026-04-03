@@ -1,7 +1,7 @@
 #pragma once
 
+#include "defines.h"
 #include <stdint.h>
-#include <sys/iosupport.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -185,29 +185,35 @@ ContentRedirectionStatus ContentRedirection_SetActive(CRLayerHandle handle, bool
  *
  * @param device        Device that will be added
  * @param resultOut     Will hold the result of the "AddDevice" call.
- * @return CONTENT_REDIRECTION_RESULT_SUCCESS:              AddDevice has been called, result is written to resultOut. <br>
- *                                                          See documentation of AddDevice for more information <br>
+ * @return CONTENT_REDIRECTION_RESULT_SUCCESS:              AddDevice has been called, result is written to resultOut.
  *         CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED:    "ContentRedirection_InitLibrary()" was not called. <br>
  *         CONTENT_REDIRECTION_RESULT_UNSUPPORTED_COMMAND:  This command is not supported by the currently loaded Module. <br>
  *         CONTENT_REDIRECTION_RESULT_INVALID_ARG:          resultOut is NULL. <br>
  *         CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR:        Unknown error. <br>
  */
-ContentRedirectionStatus ContentRedirection_AddDevice(const devoptab_t *device, int *resultOut);
+ContentRedirectionStatus ContentRedirection_AddDeviceABI(const ContentRedirectionDeviceABI *device, int *resultOut);
 
 /**
  * Calls "RemoveDevice" for the ContentRedirection Module.
  *
- * @param name      name of the device that will be added. e.g. "romfs:"
- * @param resultOut Will hold the result of the "AddDevice" call.
- * @return  CONTENT_REDIRECTION_RESULT_SUCCESS:           RemoveDevice has been called, result is written to resultOut. <br>
- *                                                        See documentation of RemoveDevice for more information <br>
- *          CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED: "ContentRedirection_InitLibrary()" was not called. <br>
- *         CONTENT_REDIRECTION_RESULT_UNSUPPORTED_COMMAND:  This command is not supported by the currently loaded Module. <br>
- *          CONTENT_REDIRECTION_RESULT_INVALID_ARG:       resultOut is NULL. <br>
- *          CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR:     Unknown error.
+ * @param name      name of the device that will be removed. e.g. "romfs:"
+ * @param resultOut Will hold the result of the "RemoveDevice" call.
+ * @return  CONTENT_REDIRECTION_RESULT_SUCCESS:             RemoveDevice has been called, result is written to resultOut. <br>
+ *          CONTENT_REDIRECTION_RESULT_LIB_UNINITIALIZED:   "ContentRedirection_InitLibrary()" was not called. <br>
+ *          CONTENT_REDIRECTION_RESULT_UNSUPPORTED_COMMAND: This command is not supported by the currently loaded Module. <br>
+ *          CONTENT_REDIRECTION_RESULT_INVALID_ARG:         resultOut is NULL. <br>
+ *          CONTENT_REDIRECTION_RESULT_UNKNOWN_ERROR:       Unknown error.
  */
-ContentRedirectionStatus ContentRedirection_RemoveDevice(const char *name, int *resultOut);
-
+ContentRedirectionStatus ContentRedirection_RemoveDeviceABI(const char *device_name, int *resultOut);
 #ifdef __cplusplus
 } // extern "C"
+#endif
+
+#ifdef __cplusplus
+#include "devoptab_cpp_wrapper.h"
+#else
+static inline ContentRedirectionStatus ContentRedirection_RemoveDevice(const char *device_name, int *resultOut) {
+    return ContentRedirection_RemoveDeviceABI(device_name, resultOut);
+}
+
 #endif
