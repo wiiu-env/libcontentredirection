@@ -447,114 +447,142 @@ namespace CR_DevoptabWrapper {
         inline static ContentRedirectionDeviceABI abi = {};
         inline static int deviceId                    = -1;
 
-        static int open(void *fileStruct, const char *path, int flags, uint32_t mode) {
+        static int open(void *deviceData, void *fileStruct, const char *path, int flags, uint32_t mode) {
+            (void) deviceData;
             return Backend::open(dev, fileStruct, path, flags, mode);
         }
 
-        static int close(void *fd) {
+        static int close(void *deviceData, void *fd) {
+            (void) deviceData;
             return Backend::close(dev, fd);
         }
 
-        static ssize_t write(void *fd, const char *ptr, size_t len) {
+        static ssize_t write(void *deviceData, void *fd, const char *ptr, size_t len) {
+            (void) deviceData;
             return Backend::write(dev, fd, ptr, len);
         }
 
-        static ssize_t read(void *fd, char *ptr, size_t len) {
+        static ssize_t read(void *deviceData, void *fd, char *ptr, size_t len) {
+            (void) deviceData;
             return Backend::read(dev, fd, ptr, len);
         }
 
-        static int64_t seek(void *fd, int64_t pos, int dir) {
+        static int64_t seek(void *deviceData, void *fd, int64_t pos, int dir) {
+            (void) deviceData;
             return Backend::seek(dev, fd, pos, dir);
         }
 
-        static int fstat(void *fd, CR_Stat *st) {
+        static int fstat(void *deviceData, void *fd, CR_Stat *st) {
+            (void) deviceData;
             return Backend::fstat(dev, fd, st);
         }
 
-        static int stat(const char *file, CR_Stat *st) {
+        static int stat(void *deviceData, const char *file, CR_Stat *st) {
+            (void) deviceData;
             return Backend::stat(dev, file, st);
         }
 
-        static int link(const char *existing, const char *newLink) {
+        static int link(void *deviceData, const char *existing, const char *newLink) {
+            (void) deviceData;
             return Backend::link(dev, existing, newLink);
         }
 
-        static int unlink(const char *name) {
+        static int unlink(void *deviceData, const char *name) {
+            (void) deviceData;
             return Backend::unlink(dev, name);
         }
-        static int chdir(const char *name) {
+        static int chdir(void *deviceData, const char *name) {
+            (void) deviceData;
             return Backend::chdir(dev, name);
         }
 
-        static int rename(const char *oldName, const char *newName) {
+        static int rename(void *deviceData, const char *oldName, const char *newName) {
+            (void) deviceData;
             return Backend::rename(dev, oldName, newName);
         }
 
-        static int mkdir(const char *path, uint32_t mode) {
+        static int mkdir(void *deviceData, const char *path, uint32_t mode) {
+            (void) deviceData;
             return Backend::mkdir(dev, path, mode);
         }
 
-        static int diropen(void *dirStruct, const char *path) {
+        static int diropen(void *deviceData, void *dirStruct, const char *path) {
+            (void) deviceData;
             return Backend::diropen(dev, deviceId, dirStruct, path);
         }
 
-        static int dirreset(void *dirStruct) {
+        static int dirreset(void *deviceData, void *dirStruct) {
+            (void) deviceData;
             return Backend::dirreset(dev, deviceId, dirStruct);
         }
 
-        static int dirnext(void *dirStruct, char *filename, CR_Stat *filestat) {
+        static int dirnext(void *deviceData, void *dirStruct, char *filename, CR_Stat *filestat) {
+            (void) deviceData;
             return Backend::dirnext(dev, deviceId, dirStruct, filename, filestat);
         }
 
-        static int dirclose(void *dirStruct) {
+        static int dirclose(void *deviceData, void *dirStruct) {
+            (void) deviceData;
             return Backend::dirclose(dev, deviceId, dirStruct);
         }
 
-        static int statvfs(const char *path, CR_Statvfs *buf) {
+        static int statvfs(void *deviceData, const char *path, CR_Statvfs *buf) {
+            (void) deviceData;
             return Backend::statvfs(dev, path, buf);
         }
 
-        static int ftruncate(void *fd, int64_t len) {
+        static int ftruncate(void *deviceData, void *fd, int64_t len) {
+            (void) deviceData;
             return Backend::ftruncate(dev, fd, len);
         }
 
-        static int fsync(void *fd) {
+        static int fsync(void *deviceData, void *fd) {
+            (void) deviceData;
             return Backend::fsync(dev, fd);
         }
 
-        static int chmod(const char *path, uint32_t mode) {
+        static int chmod(void *deviceData, const char *path, uint32_t mode) {
+            (void) deviceData;
             return Backend::chmod(dev, path, mode);
         }
 
-        static int fchmod(void *fd, uint32_t mode) {
+        static int fchmod(void *deviceData, void *fd, uint32_t mode) {
+            (void) deviceData;
             return Backend::fchmod(dev, fd, mode);
         }
 
-        static int rmdir(const char *name) {
+        static int rmdir(void *deviceData, const char *name) {
+            (void) deviceData;
             return Backend::rmdir(dev, name);
         }
 
-        static int lstat(const char *file, CR_Stat *st) {
+        static int lstat(void *deviceData, const char *file, CR_Stat *st) {
+            (void) deviceData;
             return Backend::lstat(dev, file, st);
         }
 
-        static int utimes(const char *filename, const CR_Timeval times[2]) {
+        static int utimes(void *deviceData, const char *filename, const CR_Timeval times[2]) {
+            (void) deviceData;
             return Backend::utimes(dev, filename, times);
         }
 
-        static int64_t fpathconf(void *fd, int name) {
+        static int64_t fpathconf(void *deviceData, void *fd, int name) {
+            (void) deviceData;
             return Backend::fpathconf(dev, fd, name);
         }
 
-        static int64_t pathconf(const char *path, int name) {
+        static int64_t pathconf(void *deviceData, const char *path, int name) {
+            (void) deviceData;
             return Backend::pathconf(dev, path, name);
         }
 
-        static int symlink(const char *target, const char *linkpath) {
+        static int symlink(void *deviceData, const char *target, const char *linkpath) {
+            (void) deviceData;
             return Backend::symlink(dev, target, linkpath);
         }
 
-        static ssize_t readlink(const char *path, char *buf, size_t bufsiz) {
+        static ssize_t readlink(void *deviceData, const char *path, char *buf, size_t bufsiz) {
+            (void) deviceData;
             return Backend::readlink(dev, path, buf, bufsiz);
         }
 
@@ -629,14 +657,14 @@ namespace CR_DevoptabWrapper {
  * @brief Transparent, ABI-safe wrapper for registering devoptab_t devices.
  * Because this is inline C++, it is compiled entirely inside the calling plugin's environment.
  */
-inline ContentRedirectionStatus ContentRedirection_AddDevice(const devoptab_t *device, int *resultOut) {
+static inline ContentRedirectionStatus ContentRedirection_AddDevice(const devoptab_t *device, int *resultOut) {
     if (!device || !resultOut) {
         return CONTENT_REDIRECTION_RESULT_INVALID_ARGUMENT;
     }
 
     using namespace CR_DevoptabWrapper;
 
-    std::lock_guard lock(GlobalState::deviceMutex);
+    std::unique_lock lock(GlobalState::deviceMutex);
 
     for (size_t i = 0; i < MAX_RUNTIME_DEVICES; i++) {
         if (GlobalState::activeDevices[i] == nullptr || GlobalState::activeDevices[i] == device) {
@@ -644,31 +672,44 @@ inline ContentRedirectionStatus ContentRedirection_AddDevice(const devoptab_t *d
 
             const auto *abiDevice = GlobalState::binders[i](device);
 
-            return ContentRedirection_AddDeviceABI(abiDevice, resultOut);
+            lock.unlock();
+
+            auto res = ContentRedirection_AddDeviceABI(abiDevice, resultOut);
+
+            if (res != CONTENT_REDIRECTION_RESULT_SUCCESS) {
+                lock.lock();
+                if (GlobalState::activeDevices[i] == device) {
+                    GlobalState::activeDevices[i] = nullptr;
+                }
+                lock.unlock();
+            }
+            return res;
         }
     }
     return CONTENT_REDIRECTION_RESULT_NO_MEMORY;
 }
 
-inline ContentRedirectionStatus ContentRedirection_RemoveDevice(const char *deviceName, int *resultOut) {
+static inline ContentRedirectionStatus ContentRedirection_RemoveDevice(const char *deviceName, int *resultOut) {
     if (!deviceName || !resultOut) {
         return CONTENT_REDIRECTION_RESULT_INVALID_ARGUMENT;
     }
 
     using namespace CR_DevoptabWrapper;
 
-    std::lock_guard lock(GlobalState::deviceMutex);
-
     auto *separator      = strchr(deviceName, ':');
     size_t deviceNameLen = (separator != nullptr) ? (separator - deviceName) : strlen(deviceName);
 
-    for (size_t i = 0; i < MAX_RUNTIME_DEVICES; i++) {
-        if (GlobalState::activeDevices[i]) {
-            size_t namelen = strlen(GlobalState::activeDevices[i]->name);
+    {
+        std::lock_guard lock(GlobalState::deviceMutex);
 
-            if (deviceNameLen == namelen) {
-                if (strncmp(GlobalState::activeDevices[i]->name, deviceName, deviceNameLen) == 0) {
-                    GlobalState::activeDevices[i] = nullptr;
+        for (size_t i = 0; i < MAX_RUNTIME_DEVICES; i++) {
+            if (GlobalState::activeDevices[i]) {
+                size_t namelen = strlen(GlobalState::activeDevices[i]->name);
+
+                if (deviceNameLen == namelen) {
+                    if (strncmp(GlobalState::activeDevices[i]->name, deviceName, deviceNameLen) == 0) {
+                        GlobalState::activeDevices[i] = nullptr;
+                    }
                 }
             }
         }

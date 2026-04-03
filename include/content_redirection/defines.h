@@ -60,80 +60,80 @@ typedef struct ContentRedirectionDeviceABI {
     const char *name; /**< Name of the registered device (e.g., "romfs") */
     int structSize;   /**< Size of the internal file struct */
     int dirStateSize; /**< Size of the internal dir struct */
-    void *deviceData; /**< Opaque pointer to device-specific instance data */
+    void *deviceData; /**< Context data passed into each function call */
 
     // --- File Operations ---
     /**
      * @brief Opens a file.
      * @return 0 or a positive identifier on success, negative errno on failure.
      */
-    int (*open)(void *fileStruct, const char *path, int flags, uint32_t mode);
+    int (*open)(void *deviceData, void *fileStruct, const char *path, int flags, uint32_t mode);
 
     /**
      * @brief Closes an open file.
      * @return 0 on success, negative errno on failure.
      */
-    int (*close)(void *fd);
+    int (*close)(void *deviceData, void *fd);
 
     /**
      * @brief Writes data to an open file.
      * @return Number of bytes written on success, negative errno on failure.
      */
-    ssize_t (*write)(void *fd, const char *ptr, size_t len);
+    ssize_t (*write)(void *deviceData, void *fd, const char *ptr, size_t len);
 
     /**
      * @brief Reads data from an open file.
      * @return Number of bytes read on success, 0 on EOF, negative errno on failure.
      */
-    ssize_t (*read)(void *fd, char *ptr, size_t len);
+    ssize_t (*read)(void *deviceData, void *fd, char *ptr, size_t len);
 
     /**
      * @brief Repositions the file offset.
      * @return The new offset from the beginning of the file, negative errno on failure.
      */
-    int64_t (*seek)(void *fd, int64_t pos, int dir);
+    int64_t (*seek)(void *deviceData, void *fd, int64_t pos, int dir);
 
     /**
      * @brief Retrieves information about an open file descriptor.
      * @return 0 on success, negative errno on failure.
      */
-    int (*fstat)(void *fd, CR_Stat *st);
+    int (*fstat)(void *deviceData, void *fd, CR_Stat *st);
 
     /**
      * @brief Retrieves information about a file by its path.
      * @return 0 on success, negative errno on failure.
      */
-    int (*stat)(const char *file, CR_Stat *st);
+    int (*stat)(void *deviceData, const char *file, CR_Stat *st);
 
     /**
      * @brief Creates a hard link to an existing file.
      * @return 0 on success, negative errno on failure.
      */
-    int (*link)(const char *existing, const char *newLink);
+    int (*link)(void *deviceData, const char *existing, const char *newLink);
 
     /**
      * @brief Deletes a name and possibly the file it refers to.
      * @return 0 on success, negative errno on failure.
      */
-    int (*unlink)(const char *name);
+    int (*unlink)(void *deviceData, const char *name);
 
     /**
      * @brief Changes the current working directory.
      * @return 0 on success, negative errno on failure.
      */
-    int (*chdir)(const char *name);
+    int (*chdir)(void *deviceData, const char *name);
 
     /**
      * @brief Renames a file or directory.
      * @return 0 on success, negative errno on failure.
      */
-    int (*rename)(const char *oldName, const char *newName);
+    int (*rename)(void *deviceData, const char *oldName, const char *newName);
 
     /**
      * @brief Creates a new directory.
      * @return 0 on success, negative errno on failure.
      */
-    int (*mkdir)(const char *path, uint32_t mode);
+    int (*mkdir)(void *deviceData, const char *path, uint32_t mode);
 
     // --- Directory Operations ---
 
@@ -141,98 +141,98 @@ typedef struct ContentRedirectionDeviceABI {
      * @brief Opens a directory stream.
      * @return 0 on success, negative errno on failure.
      */
-    int (*diropen)(void *dirStruct, const char *path);
+    int (*diropen)(void *deviceData, void *dirStruct, const char *path);
 
     /**
      * @brief Resets a directory stream to the beginning.
      * @return 0 on success, negative errno on failure.
      */
-    int (*dirreset)(void *dirStruct);
+    int (*dirreset)(void *deviceData, void *dirStruct);
 
     /**
      * @brief Reads the next entry from a directory stream.
      * @return 0 on success, negative errno on failure (e.g., -ENOENT for end of stream).
      */
-    int (*dirnext)(void *dirStruct, char *filename, CR_Stat *filestat);
+    int (*dirnext)(void *deviceData, void *dirStruct, char *filename, CR_Stat *filestat);
 
     /**
      * @brief Closes a directory stream.
      * @return 0 on success, negative errno on failure.
      */
-    int (*dirclose)(void *dirStruct);
+    int (*dirclose)(void *deviceData, void *dirStruct);
 
     // --- Advanced / VFS Operations ---
     /**
      * @brief Retrieves filesystem statistics.
      * @return 0 on success, negative errno on failure.
      */
-    int (*statvfs)(const char *path, CR_Statvfs *buf);
+    int (*statvfs)(void *deviceData, const char *path, CR_Statvfs *buf);
 
     /**
      * @brief Truncates an open file to a specified length.
      * @return 0 on success, negative errno on failure.
      */
-    int (*ftruncate)(void *fd, int64_t len);
+    int (*ftruncate)(void *deviceData, void *fd, int64_t len);
 
     /**
      * @brief Flushes file modifications to physical storage.
      * @return 0 on success, negative errno on failure.
      */
-    int (*fsync)(void *fd);
+    int (*fsync)(void *deviceData, void *fd);
 
     /**
      * @brief Changes the permissions of a file by path.
      * @return 0 on success, negative errno on failure.
      */
-    int (*chmod)(const char *path, uint32_t mode);
+    int (*chmod)(void *deviceData, const char *path, uint32_t mode);
 
     /**
      * @brief Changes the permissions of an open file.
      * @return 0 on success, negative errno on failure.
      */
-    int (*fchmod)(void *fd, uint32_t mode);
+    int (*fchmod)(void *deviceData, void *fd, uint32_t mode);
 
     /**
      * @brief Removes a directory.
      * @return 0 on success, negative errno on failure.
      */
-    int (*rmdir)(const char *name);
+    int (*rmdir)(void *deviceData, const char *name);
 
     /**
      * @brief Retrieves information about a file, not following symlinks.
      * @return 0 on success, negative errno on failure.
      */
-    int (*lstat)(const char *file, CR_Stat *st);
+    int (*lstat)(void *deviceData, const char *file, CR_Stat *st);
 
     /**
      * @brief Changes the access and modification times of a file.
      * @return 0 on success, negative errno on failure.
      */
-    int (*utimes)(const char *filename, const CR_Timeval times[2]);
+    int (*utimes)(void *deviceData, const char *filename, const CR_Timeval times[2]);
 
     /**
      * @brief Retrieves configuration values for an open file descriptor.
      * @return The requested configuration value, negative errno on failure.
      */
-    int64_t (*fpathconf)(void *fd, int name);
+    int64_t (*fpathconf)(void *deviceData, void *fd, int name);
 
     /**
      * @brief Retrieves configuration values for a file by path.
      * @return The requested configuration value, negative errno on failure.
      */
-    int64_t (*pathconf)(const char *path, int name);
+    int64_t (*pathconf)(void *deviceData, const char *path, int name);
 
     /**
      * @brief Creates a symbolic link.
      * @return 0 on success, negative errno on failure.
      */
-    int (*symlink)(const char *target, const char *linkpath);
+    int (*symlink)(void *deviceData, const char *target, const char *linkpath);
 
     /**
      * @brief Reads the value of a symbolic link.
      * @return Number of bytes placed in buf on success, negative errno on failure.
      */
-    ssize_t (*readlink)(const char *path, char *buf, size_t bufsiz);
+    ssize_t (*readlink)(void *deviceData, const char *path, char *buf, size_t bufsiz);
 } ContentRedirectionDeviceABI;
 
 #ifdef __cplusplus
